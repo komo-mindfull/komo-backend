@@ -52,3 +52,52 @@ def get_all_entries(db : Session = Depends(get_db), current_user : int = Depends
     entries = db.query(models.Journal).filter(models.Journal.customer_id == customer_data.user_id).order_by(models.Journal.date_created).all()
 
     return entries
+
+# Route to delete a journal entry
+@router.delete("/journal/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_entry(entry_id : int, db : Session = Depends(get_db), current_user : int = Depends(get_current_user)):
+    customer_q = db.query(models.Customer).filter(models.Customer.user_id == current_user)
+    customer_data = customer_q.first()
+
+    if customer_data is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User Does not exist")
+
+    entry_q = db.query(models.Journal).filter(models.Journal.id == entry_id)
+    entry_data = entry_q.first()
+
+    if entry_data is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry does not exist")
+
+    if entry_data.customer_id != customer_data.user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to delete this entry")
+
+    db.delete(entry_data)
+    db.commit()
+
+    return "Entry deleted"
+
+# Route to update a journal entry
+@router.put("/journal/{entry_id}", status_code=status.HTTP_202_ACCEPTED, response_model=CreatedJournal)
+def update_journal(enttry_id : int, updated_entry : JournalEntry, db : Session = Depends(get_db), current_user : int = Depends(get_current_user)):
+    customer_q = db.query(models.Customer).filter(models.Customer.user_id == current_user)
+    customer_data = customer_q.first()
+
+    if customer_data is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist")
+
+    entry_q = db.query(models.Journal).filter(models.Journal.id == enttry_id)
+    entry_data = entry_q.first()
+
+    if entry_data is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entry does not exist")
+
+    if entry_data.customer_id != customer_data.user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to update this entry")
+
+    entry_data.title = updated_entry.title
+    entry_data.body = updated_entry.body
+
+    db.commit()
+    db.refresh(entry_data)
+
+    return entry_data

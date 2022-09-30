@@ -1,12 +1,15 @@
+from http.client import HTTPException
 from time import sleep
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
+from requests import Session
 from . import models
-from .database import engine
+from .database import engine, get_db
 from .routers.users import router as user_route
 from .routers.auth import router as auth_route
 from .routers.journal import router as journal_router
-from .config import envar
+from .oAuth2 import get_current_user
 
 
 while True:
@@ -36,3 +39,11 @@ app.include_router(journal_router)
 @app.get("/")
 def root():
     return {"messages": "Hello World"}
+
+@app.get("/currentuser")
+def current_user(db : Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    curr_user = db.query(models.User).filter(models.User.id == current_user).first()
+    if not curr_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    curr_user.password = None
+    return curr_user

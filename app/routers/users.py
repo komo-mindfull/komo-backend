@@ -62,13 +62,7 @@ def get_all_customers(db: Session = Depends(get_db)):
 # Route to update a customer profile
 @router.put("/users/customer/update", status_code=status.HTTP_200_OK, response_model=CreatedCustomer)
 def update_customer(update_cust: UpdateCustomerProfile, response: Response, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
-    
-    # TODO Test case for this function
-    # TODO User not logged in
-    # TODO User is not a customer
-    # TODO User is a customer
-    # TODO incorrect data
-    
+        
     customer_q = db.query(models.Customer).filter(models.Customer.user_id == current_user)
     customer_data = customer_q.first()
     if not customer_data:
@@ -120,12 +114,6 @@ def get_all_experts(db: Session = Depends(get_db)):
 @router.put("/users/expert/update", status_code=status.HTTP_200_OK, response_model=ExpertCreated)
 def update_expert(update_expert: UpdateExpertProfile, response: Response, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
 
-    # TODO Test case for this function
-    # TODO User not logged in
-    # TODO User is not a expert
-    # TODO User is a expert
-    # TODO incorrect data
-
     expert_q = db.query(models.Expert).filter(models.Expert.user_id == current_user)
 
     expert_data = expert_q.first()
@@ -149,3 +137,5 @@ def update_expert(update_expert: UpdateExpertProfile, response: Response, db: Se
     db.refresh(expert_data)
 
     return expert_data
+
+# TODO Delete user
