@@ -1,5 +1,5 @@
 from .. import models, utils
-from ..schemas import CreatedCustomer, CustomerProfile, ExpertCreated, UpdateCustomerProfile, User, CreatedUser, ExpertProfile
+from ..schemas import CreatedCustomer, CustomerProfile, ExpertCreated, UpdateCustomerProfile, UpdateExpertProfile, User, CreatedUser, ExpertProfile
 from ..oAuth2 import get_current_user
 
 from fastapi import status, HTTPException, Depends, Response, APIRouter
@@ -43,11 +43,13 @@ def create_customer(customerp: CustomerProfile, response: Response, db: Session 
 # Route to update a customer profile
 @router.put("/users/customer/update", status_code=status.HTTP_200_OK, response_model=CreatedCustomer)
 def update_customer(update_cust: UpdateCustomerProfile, response: Response, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    
     # TODO Test case for this function
     # TODO User not logged in
     # TODO User is not a customer
     # TODO User is a customer
     # TODO incorrect data
+    
     customer_q = db.query(models.Customer).filter(models.Customer.user_id == current_user)
     customer_data = customer_q.first()
     if not customer_data:
@@ -72,7 +74,7 @@ def update_customer(update_cust: UpdateCustomerProfile, response: Response, db: 
     return customer_data
 
     
-
+#Route to create an expert profile
 @router.post("/users/expert", status_code=status.HTTP_201_CREATED, response_model=ExpertCreated)
 def create_expert(expert_profile: ExpertProfile, response: Response, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     expertData = expert_profile.dict()
@@ -85,3 +87,36 @@ def create_expert(expert_profile: ExpertProfile, response: Response, db: Session
 
     return data
 
+# Route to update an expert profile
+@router.put("/users/expert/update", status_code=status.HTTP_200_OK, response_model=ExpertCreated)
+def update_expert(update_expert: UpdateExpertProfile, response: Response, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+
+    # TODO Test case for this function
+    # TODO User not logged in
+    # TODO User is not a expert
+    # TODO User is a expert
+    # TODO incorrect data
+
+    expert_q = db.query(models.Expert).filter(models.Expert.user_id == current_user)
+
+    expert_data = expert_q.first()
+    if not expert_data:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Expert profile not found")
+    
+    new_expert_data = update_expert.dict()
+    keyarr = []
+    
+    for i in new_expert_data:
+       if new_expert_data[i] is None:
+           keyarr.append(i)
+    for i in keyarr:
+        new_expert_data.pop(i)
+    del(keyarr)
+
+    new_expert_data.update({'user_id': current_user})
+    expert_q.update(new_expert_data, synchronize_session=False)
+    db.commit()
+    db.refresh(expert_data)
+
+    return expert_data

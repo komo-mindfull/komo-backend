@@ -8,6 +8,15 @@ class User(BaseModel):
     password: str
     email: EmailStr
     utype: str
+class CreatedUser(BaseModel):
+    # Email validator can be used to validate emails.
+    id: int
+    username: str
+    email: EmailStr
+    joined_at: datetime
+
+    class Config:
+        orm_mode = True
 
 class CustomerProfile(BaseModel):
     name: str
@@ -29,21 +38,15 @@ class ExpertProfile(BaseModel):
     yexp:Optional[int]
     org:str
 
+class UpdateExpertProfile(BaseModel):
+    name: Optional[str]
+    prof: Optional[str]
+    yexp: Optional[int]
+    org: Optional[str]
+
 class ExpertCreated(ExpertProfile):
     class Config:
         orm_mode = True
-
-
-class CreatedUser(BaseModel):
-    # Email validator can be used to validate emails.
-    id: int
-    username: str
-    email: EmailStr
-    joined_at: datetime
-
-    class Config:
-        orm_mode = True
-
 
 class TokenData(BaseModel):
     id: Optional[int] = None
