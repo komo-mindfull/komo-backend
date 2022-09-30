@@ -2,7 +2,6 @@ from time import sleep
 from fastapi import FastAPI
 from . import models
 from .database import engine
-from .routers.posts import router as post_route
 from .routers.users import router as user_route
 from .routers.auth import router as auth_route
 from .config import envar
