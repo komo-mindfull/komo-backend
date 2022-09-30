@@ -2,13 +2,7 @@ from pydantic import BaseSettings
 
 
 class Settings(BaseSettings):
-    db_hostname: str
-    db_port: str
-    db_password: str
-    db_name: str
-    db_username: str
-    postgresql_connection_string: str
-
+    database_url: str
     secret_key: str
     algorithm: str
     access_token_expire_minutes: int
