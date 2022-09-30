@@ -28,6 +28,12 @@ def create_user(new_user: User, response: Response, db: Session = Depends(get_db
     db.refresh(data)
     return data
 
+# Route to get all users
+@router.get("/users", status_code=status.HTTP_200_OK, response_model=list[CreatedUser])
+def get_all_users(db: Session = Depends(get_db)):
+    users = db.query(models.User).all()
+    return users
+
 # Route to create a customer profile
 @router.post("/users/customer", status_code=status.HTTP_201_CREATED, response_model=CreatedCustomer)
 def create_customer(customerp: CustomerProfile, response: Response, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
@@ -39,6 +45,12 @@ def create_customer(customerp: CustomerProfile, response: Response, db: Session 
     db.refresh(data)
 
     return data
+
+# Route to get all customer profiles
+@router.get("/users/customer", status_code=status.HTTP_200_OK, response_model=list[CreatedCustomer])
+def get_all_customers(db: Session = Depends(get_db)):
+    customers = db.query(models.Customer).all()
+    return customers
 
 # Route to update a customer profile
 @router.put("/users/customer/update", status_code=status.HTTP_200_OK, response_model=CreatedCustomer)
@@ -86,6 +98,12 @@ def create_expert(expert_profile: ExpertProfile, response: Response, db: Session
     db.refresh(data)
 
     return data
+
+# Route to get all expert profiles
+@router.get("/users/expert", status_code=status.HTTP_200_OK, response_model=list[ExpertCreated])
+def get_all_experts(db: Session = Depends(get_db)):
+    experts = db.query(models.Expert).all()
+    return experts
 
 # Route to update an expert profile
 @router.put("/users/expert/update", status_code=status.HTTP_200_OK, response_model=ExpertCreated)
