@@ -36,6 +36,20 @@ def get_all_users(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
     return users
 
+# Route to delete a user
+@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: int, db: Session = Depends(get_db), current_user : int = Depends(get_current_user)):
+    if current_user != user_id:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail=f"You are not authorized to delete this user")
+    user = db.query(models.User).filter(models.User.id == user_id)
+    if not user.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"User with id {user_id} not found")
+    user.delete(synchronize_session=False)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
 # Route to create a customer profile
 @router.post("/users/customer", status_code=status.HTTP_201_CREATED, response_model=CreatedCustomer)
 def create_customer(customerp: CustomerProfile, response: Response, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
