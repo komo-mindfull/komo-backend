@@ -3,6 +3,7 @@ from typing import Optional
 from datetime import datetime
 
 
+
 class User(BaseModel):
     username: str
     password: str
@@ -50,3 +51,11 @@ class ExpertCreated(ExpertProfile):
 
 class TokenData(BaseModel):
     id: Optional[int] = None
+
+class JournalEntry(BaseModel):
+    title: Optional[str]
+    body: Optional[str]
+
+class CreatedJournal(JournalEntry):
+    class Config:
+        orm_mode = True
