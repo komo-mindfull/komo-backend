@@ -5,6 +5,7 @@ from ..database import get_db
 from ..oAuth2 import get_current_user
 from .. import models
 from ..schemas import JournalEntry, CreatedJournal
+from typing import List
 
 router = APIRouter(
     tags=['journal']
@@ -38,3 +39,15 @@ def create_entry(new_entry : JournalEntry, db : Session = Depends(get_db), curre
     db.refresh(entry)
 
     return entry
+
+# Route to get all journal entries
+@router.get("/journal", status_code=status.HTTP_200_OK, response_model=List[CreatedJournal])
+def get_all_entries(db : Session = Depends(get_db), current_user : int = Depends(get_current_user)):
+    customer_q = db.query(models.Customer).filter(models.Customer.user_id == current_user)
+    customer_data = customer_q.first()
+
+    if customer_data is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User does exist")
+
+    entries = db.query(models.Journal).filter(models.Journal.customer_id == customer_data.user_id).all()
+    return entries

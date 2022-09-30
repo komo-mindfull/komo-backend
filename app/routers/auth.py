@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.get("/login")
+@router.post("/login")
 def login(user_detail: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user_query = db.query(models.User).filter(
         models.User.username == user_detail.username)
