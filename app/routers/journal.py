@@ -49,5 +49,6 @@ def get_all_entries(db : Session = Depends(get_db), current_user : int = Depends
     if customer_data is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User does exist")
 
-    entries = db.query(models.Journal).filter(models.Journal.customer_id == customer_data.user_id).all()
+    entries = db.query(models.Journal).filter(models.Journal.customer_id == customer_data.user_id).order_by(models.Journal.date_created).all()
+
     return entries
