@@ -23,6 +23,6 @@ app.include_router(user_route)
 app.include_router(auth_route)
 
 
-@ app.get('/')
+@app.get('/')
 def root():
     return {"messages": "Hello World"}
