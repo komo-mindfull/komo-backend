@@ -78,14 +78,14 @@ def delete_entry(entry_id : int, db : Session = Depends(get_db), current_user : 
 
 # Route to update a journal entry
 @router.put("/journal/{entry_id}", status_code=status.HTTP_202_ACCEPTED, response_model=CreatedJournal)
-def update_journal(enttry_id : int, updated_entry : JournalEntry, db : Session = Depends(get_db), current_user : int = Depends(get_current_user)):
+def update_journal(entry_id : int, updated_entry : JournalEntry, db : Session = Depends(get_db), current_user : int = Depends(get_current_user)):
     customer_q = db.query(models.Customer).filter(models.Customer.user_id == current_user)
     customer_data = customer_q.first()
 
     if customer_data is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist")
 
-    entry_q = db.query(models.Journal).filter(models.Journal.id == enttry_id)
+    entry_q = db.query(models.Journal).filter(models.Journal.id == entry_id)
     entry_data = entry_q.first()
 
     if entry_data is None:
@@ -94,9 +94,17 @@ def update_journal(enttry_id : int, updated_entry : JournalEntry, db : Session =
     if entry_data.customer_id != customer_data.user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to update this entry")
 
-    entry_data.title = updated_entry.title
-    entry_data.body = updated_entry.body
+    keyarr = []
+    new_entry_data = updated_entry.dict()
+    for i in new_entry_data:
+        if new_entry_data[i] is None:
+            keyarr.append(i)
+    for i in keyarr:
+        new_entry_data.pop(i)
 
+    new_entry_data.update({'customer_id': customer_data.user_id})
+
+    entry_q.update(new_entry_data, synchronize_session=False)
     db.commit()
     db.refresh(entry_data)
 

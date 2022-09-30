@@ -57,5 +57,6 @@ class JournalEntry(BaseModel):
     body: Optional[str]
 
 class CreatedJournal(JournalEntry):
+    id: int
     class Config:
         orm_mode = True
