@@ -1,5 +1,6 @@
 from time import sleep
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from .database import engine
 from .routers.users import router as user_route
@@ -18,11 +19,20 @@ while True:
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# app.include_router(post_route)
 app.include_router(user_route)
 app.include_router(auth_route)
 app.include_router(journal_router)
 
 
-@app.get('/')
+@app.get("/")
 def root():
     return {"messages": "Hello World"}
