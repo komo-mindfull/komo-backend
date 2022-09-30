@@ -39,6 +39,11 @@ def get_all_users(db: Session = Depends(get_db)):
 # Route to create a customer profile
 @router.post("/users/customer", status_code=status.HTTP_201_CREATED, response_model=CreatedCustomer)
 def create_customer(customerp: CustomerProfile, response: Response, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    customer_q = db.query(models.Customer).filter(models.Customer.user_id == current_user)
+    
+    if customer_q.first():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Customer profile already exists")
+    
     custData = customerp.dict()
     custData['user_id'] = current_user
     data = models.Customer(**custData)
@@ -91,6 +96,10 @@ def update_customer(update_cust: UpdateCustomerProfile, response: Response, db: 
 #Route to create an expert profile
 @router.post("/users/expert", status_code=status.HTTP_201_CREATED, response_model=ExpertCreated)
 def create_expert(expert_profile: ExpertProfile, response: Response, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
+    expert_q = db.query(models.Expert).filter(models.Expert.user_id == current_user)
+    if expert_q.first():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Expert profile already exists")
+    
     expertData = expert_profile.dict()
     print(expertData)
     expertData['user_id'] = current_user
