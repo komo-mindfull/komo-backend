@@ -14,9 +14,25 @@ class CustomerProfile(BaseModel):
     age: int
     gender: str
 
+class UpdateCustomerProfile(BaseModel):
+    name: Optional[str] = None
+    age: Optional[int] = None
+    gender: Optional[str] = None
+
 class CreatedCustomer(CustomerProfile):
     class Config:
         orm_mode = True
+
+class ExpertProfile(BaseModel):
+    name:str
+    prof:str
+    yexp:Optional[int]
+    org:str
+
+class ExpertCreated(ExpertProfile):
+    class Config:
+        orm_mode = True
+
 
 class CreatedUser(BaseModel):
     # Email validator can be used to validate emails.

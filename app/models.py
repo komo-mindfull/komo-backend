@@ -62,8 +62,9 @@ class Expert(Base):
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True, nullable=False)
     name = Column(String, nullable=False)
     prof = Column(String, nullable=False)
-    yexp = Column(Integer, nullable=False)
+    yexp = Column(Integer, nullable=False, server_default='0')
+
     rating = Column(Integer, nullable=True)
     org = Column(String, nullable=False)
-    proof = Column(String, nullable=False)
+    proof = Column(String, nullable=True)
 
