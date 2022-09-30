@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     db_password: str
     db_name: str
     db_username: str
-    postgres_connection_string: str
+    postgresql_connection_string: str
 
     secret_key: str
     algorithm: str
