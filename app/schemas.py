@@ -58,5 +58,6 @@ class JournalEntry(BaseModel):
 
 class CreatedJournal(JournalEntry):
     id: int
+    date_created: datetime
     class Config:
         orm_mode = True
