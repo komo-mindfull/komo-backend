@@ -9,6 +9,7 @@ from .database import engine, get_db
 from .routers.users import router as user_route
 from .routers.auth import router as auth_route
 from .routers.journal import router as journal_router
+from .routers.expert import router as expert_router
 from .oAuth2 import get_current_user
 
 
@@ -30,10 +31,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# app.include_router(post_route)
 app.include_router(user_route)
 app.include_router(auth_route)
 app.include_router(journal_router)
+app.include_router(expert_router)
 
 
 @app.get("/")

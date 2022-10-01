@@ -1,6 +1,5 @@
-from flask_security import UsernameUtil
 from .database import Base
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 
@@ -46,5 +45,14 @@ class Journal(Base):
     date_created = Column(TIMESTAMP(timezone=True), server_default = text('now()'), nullable=False)
     date_updated = Column(TIMESTAMP(timezone=True), server_default = text('now()'), nullable=False)
     user_mood = Column(String, nullable=False, server_default='neutral')
+
+class Meeting(Base):
+    __tablename__ = 'meeting'
+
+    customer_id = Column(Integer, ForeignKey('customer.user_id', ondelete='CASCADE'), primary_key=True, nullable=False)
+    expert_id = Column(Integer, ForeignKey('expert.user_id', ondelete='CASCADE'), primary_key=True, nullable=False)
+    date = Column(TIMESTAMP(timezone=True), nullable=False)
+    topic = Column(String, nullable=False)
+    is_cancelled = Column(Boolean, nullable=False, server_default='false')
 
 
