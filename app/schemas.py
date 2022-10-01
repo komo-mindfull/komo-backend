@@ -80,3 +80,13 @@ class CreatedJournal(JournalEntry):
 
     class Config:
         orm_mode = True
+
+class Meeting(BaseModel):
+    expert_id: int
+    date: datetime
+    topic: str
+
+class MeetingCreated(Meeting):
+    customer_id: int
+    class Config:
+        orm_mode = True
