@@ -6,11 +6,15 @@ from ..oAuth2 import get_current_user
 from .. import models
 from ..schemas import JournalEntry, CreatedJournal
 from typing import List
+from ..sentiment import sentiment_pipeline
 
 router = APIRouter(
     tags=['journal']
 )
 
+def analyze_sentiment(text: str):
+    data = sentiment_pipeline(text)
+    return data[0]['label']
 
 # Route to create new journal
 @router.post("/journal", status_code=status.HTTP_201_CREATED, response_model=CreatedJournal)
@@ -30,8 +34,11 @@ def create_entry(new_entry : JournalEntry, db : Session = Depends(get_db), curre
     else:
         if new_journal_entry['body'] is None:
             new_journal_entry['body'] = 'No description'
+        
+    mood = analyze_sentiment(new_journal_entry['body'])
     
     new_journal_entry['customer_id'] = customer_data.user_id
+    new_journal_entry['user_mood'] = mood
 
     entry = models.Journal(**new_journal_entry)
     db.add(entry)
@@ -103,7 +110,9 @@ def update_journal(entry_id : int, updated_entry : JournalEntry, db : Session = 
         new_entry_data.pop(i)
 
     new_entry_data.update({'customer_id': customer_data.user_id})
-
+    mood = analyze_sentiment(new_entry_data['body'])
+    new_entry_data.update({'user_mood': mood})
+    
     entry_q.update(new_entry_data, synchronize_session=False)
     db.commit()
     db.refresh(entry_data)

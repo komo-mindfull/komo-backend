@@ -66,5 +66,6 @@ class JournalEntry(BaseModel):
 class CreatedJournal(JournalEntry):
     id: int
     date_created: datetime
+    user_mood: str
     class Config:
         orm_mode = True
