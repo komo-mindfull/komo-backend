@@ -47,4 +47,10 @@ class Journal(Base):
     date_updated = Column(TIMESTAMP(timezone=True), server_default = text('now()'), nullable=False)
     user_mood = Column(String, nullable=False, server_default='neutral')
 
+# class Meeting(Base):
+#     __tablename__ = 'meeting'
+
+#     customer_id = Column(Integer, ForeignKey('customer.user_id', ondelete='CASCADE'), primary_key=True, nullable=False)
+#     expert_id = Column(Integer, ForeignKey('expert.user_id', ondelete='CASCADE'), primary_key=True, nullable=False)
+#     meeting_data = Column(TIMESTAMP(timezone=True), server_default = text('now()'), nullable=False)
 
