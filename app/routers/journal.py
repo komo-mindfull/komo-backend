@@ -109,3 +109,4 @@ def update_journal(entry_id : int, updated_entry : JournalEntry, db : Session = 
     db.refresh(entry_data)
 
     return entry_data
+#nice
