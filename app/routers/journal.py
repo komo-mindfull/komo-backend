@@ -35,7 +35,8 @@ def create_entry(new_entry : JournalEntry, db : Session = Depends(get_db), curre
         if new_journal_entry['body'] is None:
             new_journal_entry['body'] = 'No description'
         
-    mood = analyze_sentiment(new_journal_entry['body'])
+        else:
+            mood = analyze_sentiment(new_journal_entry['body'])
     
     new_journal_entry['customer_id'] = customer_data.user_id
     new_journal_entry['user_mood'] = mood
@@ -100,9 +101,15 @@ def update_journal(entry_id : int, updated_entry : JournalEntry, db : Session = 
 
     if entry_data.customer_id != customer_data.user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to update this entry")
+    
 
     keyarr = []
     new_entry_data = updated_entry.dict()
+
+    if new_entry_data['body'] is not None:
+        mood = analyze_sentiment(new_entry_data['body'])
+    else:
+        mood = entry_data.user_mood
     for i in new_entry_data:
         if new_entry_data[i] is None:
             keyarr.append(i)
@@ -110,7 +117,7 @@ def update_journal(entry_id : int, updated_entry : JournalEntry, db : Session = 
         new_entry_data.pop(i)
 
     new_entry_data.update({'customer_id': customer_data.user_id})
-    mood = analyze_sentiment(new_entry_data['body'])
+    
     new_entry_data.update({'user_mood': mood})
     
     entry_q.update(new_entry_data, synchronize_session=False)
