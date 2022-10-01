@@ -1,6 +1,6 @@
 from .. import models, utils
-from ..schemas import CreatedCustomer, CustomerProfile, ExpertCreated, UpdateCustomerProfile, UpdateExpertProfile, User, CreatedUser, ExpertProfile
-from ..oAuth2 import get_current_user
+from ..schemas import CreatedCustomer, CreatedUserLogin, CustomerProfile, ExpertCreated, UpdateCustomerProfile, UpdateExpertProfile, User, CreatedUser, ExpertProfile
+from ..oAuth2 import get_current_user, create_acces_token
 
 from fastapi import status, HTTPException, Depends, Response, APIRouter
 from ..database import get_db
@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 # Route to create a new user
-@router.post("/users", status_code=status.HTTP_201_CREATED, response_model=CreatedUser)
+@router.post("/users", status_code=status.HTTP_201_CREATED, response_model=CreatedUserLogin)
 def create_user(new_user: User, response: Response, db: Session = Depends(get_db)):
 
     # TODO Add verification using OTP
@@ -24,11 +24,19 @@ def create_user(new_user: User, response: Response, db: Session = Depends(get_db
 
     userData = new_user.dict()
     userData['password'] = utils.hash_password(userData['password'])
-    data = models.User(**userData)
-    db.add(data)
+    user_details = models.User(**userData)
+    db.add(user_details)
     db.commit()
-    db.refresh(data)
-    return data
+    db.refresh(user_details)    
+    user_details = user_details.__dict__
+    print(user_details)
+    token = create_acces_token(data={'id': user_details["id"]})
+    
+    user_details["access_token"] = token
+    user_details["token_type"] = 'bearer'
+
+    return user_details
+    
 
 # Route to get all users
 @router.get("/users", status_code=status.HTTP_200_OK, response_model=list[CreatedUser])

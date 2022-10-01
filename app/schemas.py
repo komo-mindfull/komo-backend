@@ -19,6 +19,13 @@ class CreatedUser(BaseModel):
     class Config:
         orm_mode = True
 
+class CreatedUserLogin(CreatedUser):
+    access_token: str
+    token_type: str
+
+    class Config:
+        orm_mode = True
+
 class CustomerProfile(BaseModel):
     name: str
     age: int
