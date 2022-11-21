@@ -3,7 +3,6 @@ from time import sleep
 from fastapi import FastAPI, Depends
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
-from requests import Session
 from . import models
 from .database import engine, get_db
 from .routers.users import router as user_route
