@@ -40,6 +40,7 @@ def create_entry(
 
     return entry
 
+
 # Route to delete a journal entry
 @router.delete("/journal/{entry_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_entry(
@@ -78,14 +79,18 @@ def delete_entry(
 
 
 # Route to add links to a journal entry
-@router.put("/journal/links/{entry_id}", status_code=status.HTTP_202_ACCEPTED, response_model=AddLinksResponse)
+@router.put(
+    "/journal/links/{entry_id}",
+    status_code=status.HTTP_202_ACCEPTED,
+    response_model=AddLinksResponse,
+)
 def new_journal_links(
     entry_id: int,
     parent_ID: AddLinks,
     db: Session = Depends(get_db),
     current_user: int = Depends(get_current_user),
 ):
-    """ 
+    """
     entery_ID  = Id of the child entry \n
     parent_ID = id of the parent entry
     """
@@ -94,14 +99,14 @@ def new_journal_links(
     )
     customer_data = customer_q.first()
 
-    #Check if user exists
+    # Check if user exists
     if customer_data is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist"
         )
 
     entry_q = db.query(models.Journal).filter(models.Journal.id == entry_id)
-    entry_data  = entry_q.first()
+    entry_data = entry_q.first()
 
     # Check if entry exists
     if entry_data is None:
@@ -116,11 +121,17 @@ def new_journal_links(
             detail="You do not have permission to update this entry",
         )
 
-    journal_query = db.query(models.Journal).filter(models.Journal.id == parent_ID.parent_id, models.Journal.customer_id == customer_data.user_id)
+    journal_query = db.query(models.Journal).filter(
+        models.Journal.id == parent_ID.parent_id,
+        models.Journal.customer_id == customer_data.user_id,
+    )
     journal_data = journal_query.first()
     if journal_data is None:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Not Authorized to link parent_ID {} to this entry".format(parent_ID.parent_id)
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not Authorized to link parent_ID {} to this entry".format(
+                parent_ID.parent_id
+            ),
         )
     # Check if link to parent entry exists
 
@@ -133,12 +144,10 @@ def new_journal_links(
         entry_data.link_ids.append(parent_ID.parent_id)
         entry_q.update({"link_ids": entry_data.link_ids}, synchronize_session=False)
 
-    
     else:
         list_ID = [parent_ID.parent_id]
         entry_q.update({"link_ids": list_ID}, synchronize_session=False)
-    
-    
+
     db.commit()
     db.refresh(entry_data)
 
@@ -170,6 +179,7 @@ def get_all_entries(
     )
 
     return entries
+
 
 # Route to update a journal entry
 # @router.put(

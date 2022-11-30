@@ -47,13 +47,4 @@ class Journal(Base):
     date_created = Column(TIMESTAMP(timezone=True), server_default = text('now()'), nullable=False)
     link_ids = Column(ARRAY(Integer), nullable=True)
 
-class Meeting(Base):
-    __tablename__ = 'meeting'
-
-    customer_id = Column(Integer, ForeignKey('customer.user_id', ondelete='CASCADE'), primary_key=True, nullable=False)
-    expert_id = Column(Integer, ForeignKey('expert.user_id', ondelete='CASCADE'), primary_key=True, nullable=False)
-    date = Column(TIMESTAMP(timezone=True), nullable=False)
-    topic = Column(String, nullable=False)
-    is_cancelled = Column(Boolean, nullable=False, server_default='false')
-
 
