@@ -60,6 +60,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user : int 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 # Route to create a customer profile
+# TODO Make sure only correct user can create a profile
 @router.post("/users/customer", status_code=status.HTTP_201_CREATED, response_model=CreatedCustomer)
 def create_customer(customerp: CustomerProfile, response: Response, db: Session = Depends(get_db), current_user: int = Depends(get_current_user)):
     customer_q = db.query(models.Customer).filter(models.Customer.user_id == current_user)

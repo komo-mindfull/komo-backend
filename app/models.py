@@ -1,5 +1,5 @@
 from .database import Base
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
+from sqlalchemy import ARRAY, Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 
@@ -40,11 +40,12 @@ class Journal(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     customer_id = Column(Integer, ForeignKey('customer.user_id', ondelete='CASCADE'), nullable=False)
-    title = Column(String, nullable=False)
-    body = Column(String, nullable=False)
+    title = Column(String, nullable=True, server_default="Un-titled")
+    mood = Column(String, nullable=False)
+    reason = Column(String, nullable=False)
+    reflection = Column(String, nullable=False)
     date_created = Column(TIMESTAMP(timezone=True), server_default = text('now()'), nullable=False)
-    date_updated = Column(TIMESTAMP(timezone=True), server_default = text('now()'), nullable=False)
-    user_mood = Column(String, nullable=False, server_default='neutral')
+    link_ids = Column(ARRAY(Integer), nullable=True)
 
 class Meeting(Base):
     __tablename__ = 'meeting'
