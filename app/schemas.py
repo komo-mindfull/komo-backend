@@ -71,12 +71,26 @@ class TokenData(BaseModel):
 
 class JournalEntry(BaseModel):
     title: str
-    body: str
+    mood: str
+    reason: str
+    reflection: str
+    link_ids: Optional[int]
 
 
 class CreatedJournal(JournalEntry):
     id: int
+    link_ids: Optional[list[int]]
     date_created: datetime
+
+    class Config:
+        orm_mode = True
+
+class AddLinks(BaseModel):
+    parent_id: int
+
+class AddLinksResponse(BaseModel):
+    id: int
+    link_ids: list[int]
 
     class Config:
         orm_mode = True
