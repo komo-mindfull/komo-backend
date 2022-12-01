@@ -1,10 +1,18 @@
 from fastapi import status, HTTPException, Depends, Response, APIRouter
 from sqlalchemy.orm import Session
+
+from ..getJournalLinks import create_journal_graph
 from ..database import get_db
 
 from ..oAuth2 import get_current_user
 from .. import models
-from ..schemas import JournalEntry, CreatedJournal, AddLinks, AddLinksResponse
+from ..schemas import (
+    GetALlJournalResponse,
+    JournalEntry,
+    CreatedJournal,
+    AddLinks,
+    AddLinksResponse,
+)
 from typing import List
 
 router = APIRouter(tags=["journal"])
@@ -156,7 +164,7 @@ def new_journal_links(
 
 # Route to get all journal entries
 @router.get(
-    "/journal", status_code=status.HTTP_200_OK, response_model=List[CreatedJournal]
+    "/journal", status_code=status.HTTP_200_OK, response_model=GetALlJournalResponse
 )
 def get_all_entries(
     db: Session = Depends(get_db), current_user: int = Depends(get_current_user)
@@ -171,14 +179,15 @@ def get_all_entries(
             status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist"
         )
 
-    entries = (
+    entries: list[models.Journal] = (
         db.query(models.Journal)
         .filter(models.Journal.customer_id == customer_data.user_id)
         .order_by(models.Journal.date_created)
         .all()
     )
 
-    return entries
+    nodes, edges = create_journal_graph(entries)
+    return {"data": entries, "nodes": nodes, "edges": edges}
 
 
 # Route to update a journal entry
