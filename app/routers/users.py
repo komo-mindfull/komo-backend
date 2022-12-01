@@ -1,16 +1,6 @@
 from .. import models, utils
-from ..schemas import (
-    CreatedCustomer,
-    CreatedUserLogin,
-    CustomerProfile,
-    ExpertCreated,
-    UpdateCustomerProfile,
-    UpdateExpertProfile,
-    User,
-    CreatedUser,
-    ExpertProfile,
-)
-from ..oAuth2 import get_current_user, create_acces_token
+from ..schemas import User, CreatedUser
+from ..oAuth2 import get_current_user
 
 
 from fastapi import status, HTTPException, Depends, Response, APIRouter

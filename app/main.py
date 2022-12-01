@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from . import models
 from .database import engine, get_db
-from .routers import auth, users, journal, customer, experts
+from .routers import auth, users, journal, customer
 from .oAuth2 import get_current_user
 
 
@@ -31,7 +31,7 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(journal.router)
 app.include_router(customer.router)
-app.include_router(experts.router)
+# app.include_router(experts.router)
 
 
 @app.get("/")
