@@ -21,9 +21,7 @@ from sqlalchemy.orm import Session
 router = APIRouter(tags=["Users"])
 
 # Route to create a new user
-@router.post(
-    "/users", status_code=status.HTTP_201_CREATED, response_model=CreatedUserLogin
-)
+@router.post("/users", status_code=status.HTTP_201_CREATED, response_model=CreatedUser)
 def create_user(new_user: User, response: Response, db: Session = Depends(get_db)):
 
     # TODO Add verification using OTP
@@ -43,12 +41,6 @@ def create_user(new_user: User, response: Response, db: Session = Depends(get_db
     db.add(user_details)
     db.commit()
     db.refresh(user_details)
-    user_details = user_details.__dict__
-    print(user_details)
-    token = create_acces_token(data={"id": user_details["id"]})
-
-    user_details["access_token"] = token
-    user_details["token_type"] = "bearer"
 
     return user_details
 

@@ -16,6 +16,7 @@ class CreatedUser(BaseModel):
     username: str
     email: EmailStr
     joined_at: datetime
+    utype: str
 
     class Config:
         orm_mode = True
@@ -85,8 +86,10 @@ class CreatedJournal(JournalEntry):
     class Config:
         orm_mode = True
 
+
 class AddLinks(BaseModel):
     parent_id: int
+
 
 class AddLinksResponse(BaseModel):
     id: int
