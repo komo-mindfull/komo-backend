@@ -78,9 +78,14 @@ class JournalEntry(BaseModel):
     link_ids: Optional[int]
 
 
-class CreatedJournal(JournalEntry):
+class CreatedJournal(BaseModel):
     id: int
-    link_ids: Optional[list[int]]
+    title: str
+    mood: str
+    reason: str
+    reflection: str
+    # link_ids: Optional[int]
+    # link_ids: Optional[list[int]]
     date_created: datetime
 
     class Config:
@@ -94,6 +99,15 @@ class AddLinks(BaseModel):
 class AddLinksResponse(BaseModel):
     id: int
     link_ids: list[int]
+
+    class Config:
+        orm_mode = True
+
+
+class GetALlJournalResponse(BaseModel):
+    data: list[CreatedJournal]
+    nodes: list[int]
+    edges: list[tuple[int, int]]
 
     class Config:
         orm_mode = True
