@@ -16,7 +16,6 @@ router = APIRouter(tags=["Customer"])
 )
 def create_customer(
     customerp: CustomerProfile,
-    response: Response,
     db: Session = Depends(get_db),
     current_user: int = Depends(get_current_user),
 ):
@@ -59,7 +58,6 @@ def get_all_customers(db: Session = Depends(get_db)):
 )
 def update_customer(
     update_cust: UpdateCustomerProfile,
-    response: Response,
     db: Session = Depends(get_db),
     current_user: int = Depends(get_current_user),
 ):
