@@ -1,6 +1,7 @@
 from fastapi import status, HTTPException, Depends, Response, APIRouter
 from sqlalchemy.orm import Session
 
+from ..services.journal import add_parent_links
 from ..getJournalLinks import create_journal_graph
 from ..database import get_db
 
@@ -39,6 +40,24 @@ def create_entry(
         )
 
     new_journal_entry = new_entry.dict()
+    parent_ID = new_journal_entry["link_ids"]
+
+    if parent_ID is not None:
+
+        journal_query = db.query(models.Journal).filter(
+            models.Journal.id == parent_ID,
+            models.Journal.customer_id == customer_data.user_id,
+        )
+
+        journal_data = journal_query.first()
+        if journal_data is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not Authorized to link parent_ID {} to this entry".format(
+                    parent_ID
+                ),
+            )
+        new_journal_entry["link_ids"] = [parent_ID]
 
     entry = models.Journal(**new_journal_entry, customer_id=customer_data.user_id)
 
@@ -113,53 +132,9 @@ def new_journal_links(
             status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist"
         )
 
-    entry_q = db.query(models.Journal).filter(models.Journal.id == entry_id)
-    entry_data = entry_q.first()
+    journal_entry_data = add_parent_links(parent_ID, entry_id, customer_data, db)
 
-    # Check if entry exists
-    if entry_data is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Entry does not exist"
-        )
-
-    # Check if user has permission to update entry
-    if entry_data.customer_id != customer_data.user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to update this entry",
-        )
-
-    journal_query = db.query(models.Journal).filter(
-        models.Journal.id == parent_ID.parent_id,
-        models.Journal.customer_id == customer_data.user_id,
-    )
-    journal_data = journal_query.first()
-    if journal_data is None:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not Authorized to link parent_ID {} to this entry".format(
-                parent_ID.parent_id
-            ),
-        )
-    # Check if link to parent entry exists
-
-    if entry_data.link_ids:
-        if parent_ID.parent_id in entry_data.link_ids:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="This entry is already linked to this parent",
-            )
-        entry_data.link_ids.append(parent_ID.parent_id)
-        entry_q.update({"link_ids": entry_data.link_ids}, synchronize_session=False)
-
-    else:
-        list_ID = [parent_ID.parent_id]
-        entry_q.update({"link_ids": list_ID}, synchronize_session=False)
-
-    db.commit()
-    db.refresh(entry_data)
-
-    return entry_data
+    return journal_entry_data
 
 
 # Route to get all journal entries
