@@ -1,7 +1,7 @@
 from fastapi import status, HTTPException, Depends, Response, APIRouter
 from sqlalchemy.orm import Session
 
-from ..services.journal import add_parent_links
+from ..services.journal import add_parent_links, JournalService
 from ..getJournalLinks import create_journal_graph
 from ..database import get_db
 
@@ -43,21 +43,16 @@ def create_entry(
     parent_ID = new_journal_entry["link_ids"]
 
     if parent_ID is not None:
-
-        journal_query = db.query(models.Journal).filter(
-            models.Journal.id == parent_ID,
-            models.Journal.customer_id == customer_data.user_id,
+        journal_validation = JournalService(
+            current_user_ID=current_user, db=db, parent_ID=parent_ID
         )
-
-        journal_data = journal_query.first()
-        if journal_data is None:
+        if journal_validation.check_acess_parent_entry():
+            new_journal_entry["link_ids"] = [parent_ID]
+        else:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not Authorized to link parent_ID {} to this entry".format(
-                    parent_ID
-                ),
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Parent entry does not exist",
             )
-        new_journal_entry["link_ids"] = [parent_ID]
 
     entry = models.Journal(**new_journal_entry, customer_id=customer_data.user_id)
 
@@ -117,10 +112,6 @@ def new_journal_links(
     db: Session = Depends(get_db),
     current_user: int = Depends(get_current_user),
 ):
-    """
-    entery_ID  = Id of the child entry \n
-    parent_ID = id of the parent entry
-    """
     customer_q = db.query(models.Customer).filter(
         models.Customer.user_id == current_user
     )
