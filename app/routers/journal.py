@@ -101,6 +101,8 @@ def delete_entry(
 
 
 # Route to add links to a journal entry
+
+# FIXME clean up code to connect node with other nodes
 @router.put(
     "/journal/links/{entry_id}",
     status_code=status.HTTP_202_ACCEPTED,
