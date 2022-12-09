@@ -8,7 +8,6 @@ from ..schemas import CustomerProfile, CreatedCustomer, UpdateCustomerProfile
 
 router = APIRouter(tags=["Customer"])
 # Route to create a customer profile
-# TODO Make sure only correct user can create a profile
 @router.post(
     "/users/customer",
     status_code=status.HTTP_201_CREATED,

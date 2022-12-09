@@ -7,14 +7,11 @@ from fastapi import status, HTTPException, Depends, Response, APIRouter
 from ..database import get_db
 from sqlalchemy.orm import Session
 
-# TODO Add prefixes to path operations
 router = APIRouter(tags=["Users"])
 
 # Route to create a new user
 @router.post("/users", status_code=status.HTTP_201_CREATED, response_model=CreatedUser)
 def create_user(new_user: User, response: Response, db: Session = Depends(get_db)):
-
-    # TODO Add verification using OTP
 
     create_user_q = db.query(models.User).filter(
         models.User.username == new_user.username

@@ -10,6 +10,35 @@ from .. import utils, models, oAuth2
 router = APIRouter(tags=["Authentication"])
 
 
+def is_registered(usertype: str, db: Session, user_ID: int):
+    user_exception = None
+    if usertype == "customer":
+
+        if (
+            not db.query(models.Customer)
+            .filter(models.Customer.user_id == user_ID)
+            .first()
+        ):
+            return usertype, False, user_exception
+        return usertype, True, user_exception
+
+    if usertype == "expert":
+
+        if (
+            not db.query(models.Customer)
+            .filter(models.Customer.user_id == user_ID)
+            .first()
+        ):
+            return usertype, False, user_exception
+        return usertype, True, user_exception
+
+    user_exception = HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail=f"Cannot register user with utype '{usertype}'",
+    )
+    return usertype, False, user_exception
+
+
 @router.post("/login")
 def login(
     login_detail: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
@@ -38,47 +67,25 @@ def login(
 
     user_access_type = userData.utype
 
-    if user_access_type == "customer":
-
-        customer_query = db.query(models.Customer).filter(
-            models.Customer.user_id == userData.id
-        )
-        check_customer_data = customer_query.first()
-
-        if not check_customer_data:
-            return {
-                "access_token": token,
-                "token_type": "bearer",
-                "customer_registerd": False,
-            }
-        return {
-            "access_token": token,
-            "token_type": "bearer",
-            "customer_registerd": True,
-        }
-
-    if user_access_type == "expert":
-
-        expert_query = db.query(models.Expert).filter(
-            models.Expert.user_id == userData.id
-        )
-
-        check_expert_data = expert_query.first()
-
-        if not check_expert_data:
-            return {
-                "access_token": token,
-                "token_type": "bearer",
-                "expert_registerd": False,
-            }
-
-        return {
-            "access_token": token,
-            "token_type": "bearer",
-            "expert_registerd": True,
-        }
-    raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST, detail="Not a valid user"
+    usertype, registered, user_exception = is_registered(
+        user_access_type, db, userData.id
     )
+
+    if user_exception:
+        raise user_exception
+
+    if not registered:
+        return {
+            "access_token": token,
+            "token_type": "bearer",
+            "cutomer_type": usertype,
+            "customer_registerd": False,
+        }
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "cutomer_type": usertype,
+        "customer_registerd": True,
+    }
 
     # This is a test comment

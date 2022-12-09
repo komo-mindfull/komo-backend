@@ -1,7 +1,7 @@
 from fastapi import status, HTTPException, Depends, Response, APIRouter
 from sqlalchemy.orm import Session
 
-from ..services.journal import add_parent_links, JournalService
+from ..services.journal import JournalService
 from ..getJournalLinks import create_journal_graph
 from ..database import get_db
 
@@ -117,15 +117,50 @@ def new_journal_links(
     )
     customer_data = customer_q.first()
 
-    # Check if user exists
     if customer_data is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist"
         )
 
-    journal_entry_data = add_parent_links(parent_ID, entry_id, customer_data, db)
+    child_entry_query = db.query(models.Journal).filter(
+        models.Journal.id == entry_id, models.Journal.customer_id == current_user
+    )
+    child_entry_data = child_entry_query.first()
 
-    return journal_entry_data
+    if not child_entry_data:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"User does not have access to requested journal with id {entry_id}",
+        )
+
+    journal_validation = JournalService(
+        parent_ID=parent_ID.parent_id,
+        child_ID=entry_id,
+        current_user_ID=current_user,
+        db=db,
+    )
+
+    # Checking if user has access to parent journal
+    if not journal_validation.check_acess_parent_entry():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Either journal with id {parent_ID.parent_id} does not exist or user does not have access to it",
+        )
+
+    # Adding links using journal_validation object, returns query object
+    child_entry_query = journal_validation.connect_jouranl_nodes(
+        child_entry_data, child_entry_query
+    )
+    # Function connect_to_journal() returns false if journal is alredy connected
+    if not child_entry_query:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Entry {child_entry_data.id} is already linked to parent with ID {parent_ID.parent_id}",
+        )
+
+    db.commit()
+    db.refresh(child_entry_data)
+    return child_entry_data
 
 
 # Route to get all journal entries
@@ -154,3 +189,6 @@ def get_all_entries(
 
     nodes, edges = create_journal_graph(entries)
     return {"data": entries, "nodes": nodes, "edges": edges}
+
+
+# FIXME Add all the logic to chech user and journal in service file
