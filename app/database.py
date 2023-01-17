@@ -24,14 +24,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-"""while True:
-    try:
-        conn = connect(host='localhost', database='fastapi',
-                       user='postgres', password='password', port='5001', cursor_factory=RealDictCursor)
-        cursor = conn.cursor()
-        print("Database connection was succesfull")
-        break
-    except Exception as error:
-        print("Connection failed: ", error)"""

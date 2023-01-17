@@ -15,7 +15,7 @@ while True:
         break
     except Exception as error:
         print("Connection failed: ", error)
-        sleep(2)
+        sleep(10)
 
 app = FastAPI()
 
